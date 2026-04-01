@@ -1,0 +1,157 @@
+:root {
+    --bg: #f5f5f5;
+    --surface: #ffffff;
+    --text: #1f2937;
+    --muted: #6b7280;
+    --border: #d1d5db;
+    --accent: #2563eb;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: "Space Grotesk", sans-serif;
+    color: var(--text);
+    background: var(--bg);
+}
+
+.hero,
+.app-shell {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+h1 {
+    margin: 0;
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 2.5rem;
+}
+
+.subtitle {
+    margin-top: 0.5rem;
+    color: var(--muted);
+}
+
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+.control-group {
+    flex: 1 1 220px;
+}
+
+.control-group label {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+}
+
+input,
+select,
+button {
+    width: 100%;
+    padding: 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: #fff;
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+}
+
+.status {
+    margin: 0.75rem 0;
+    color: var(--muted);
+}
+
+.loader {
+    display: inline-flex;
+    gap: 0.25rem;
+}
+
+.loader span {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+}
+
+.anime-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 0.75rem;
+}
+
+.anime-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.poster {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+}
+
+.card-content {
+    padding: 0.75rem;
+}
+
+.title {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.meta-row {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    margin: 0.5rem 0;
+    color: var(--muted);
+    font-size: 0.88rem;
+}
+
+.score-pill {
+    background: #111827;
+    color: #fff;
+    padding: 0.1rem 0.45rem;
+    border-radius: 999px;
+}
+
+.genres,
+.synopsis {
+    color: #374151;
+    font-size: 0.9rem;
+}
+
+.synopsis-block {
+    margin-top: 0.4rem;
+}
+
+.details-link {
+    display: inline-block;
+    margin-top: 0.5rem;
+    color: var(--accent);
+    text-decoration: none;
+}
+
+.details-link:hover {
+    text-decoration: underline;
+}
