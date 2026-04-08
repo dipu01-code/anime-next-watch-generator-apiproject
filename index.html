@@ -28,6 +28,28 @@
                 <input id="searchInput" type="text" placeholder="Try: One Piece" />
             </div>
 
+            <div class="control-group">
+                <label for="genreFilter">Filter by Genre</label>
+                <select id="genreFilter">
+                    <option value="all">All Genres</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="sortSelect">Sort By</label>
+                <select id="sortSelect">
+                    <option value="title-asc">Title (A-Z)</option>
+                    <option value="title-desc">Title (Z-A)</option>
+                    <option value="score-desc">Score (High-Low)</option>
+                    <option value="score-asc">Score (Low-High)</option>
+                    <option value="year-desc">Year (Newest)</option>
+                    <option value="year-asc">Year (Oldest)</option>
+                </select>
+            </div>
+
+            <button id="favoritesOnlyBtn" type="button" class="secondary-btn">Show Favorites Only: Off</button>
+            <button id="themeToggleBtn" type="button" class="secondary-btn">Dark Mode: Off</button>
+
             <button id="refreshBtn" type="button">Refresh List</button>
         </section>
 
@@ -51,6 +73,7 @@
                     <summary>Synopsis</summary>
                     <p class="synopsis"></p>
                 </details>
+                <button type="button" class="favorite-btn">Add to Favorites</button>
                 <a class="details-link" target="_blank" rel="noopener noreferrer">View on MyAnimeList</a>
             </div>
         </article>
