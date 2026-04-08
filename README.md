@@ -1,67 +1,76 @@
 # Anime Next Watch Generator
 
-A web app that helps users quickly decide what anime to watch next by showing trending titles and allowing smart discovery with search.
+Anime Next Watch Generator is a responsive web app that helps users discover trending anime and choose what to watch next.
 
-## Project Purpose
+## Live Demo
 
-This project is built for a JavaScript/API/UI milestone submission. It demonstrates:
-- Public API integration using `fetch`
-- Dynamic rendering of API data
-- Simple and clean interface using CSS
+- Production URL: https://dipu01-code.github.io/anime-next-watch-generator-apiproject/
 
-## Public API Used
+## Final Milestone Features
+
+- Live anime data from Jikan API
+- Search by title (real-time)
+- Filter by genre
+- Sort by title, score, and year (ascending/descending)
+- Favorite button per anime card
+- Favorites-only toggle
+- Dark mode / light mode toggle
+- Loading and error states
+
+## Requirement Compliance
+
+Searching, filtering, and sorting are implemented with Array Higher-Order Functions:
+
+- `filter()` for search + filter logic
+- `some()` for genre match checks
+- `sort()` for ordering results
+- `flatMap()`, `reduce()`, and `map()` for genre and card data transformations
+
+No traditional `for`/`while` loops are used for search/filter/sort operations.
+
+## Refactor and Cleanup Summary
+
+- Improved state handling with dedicated helper functions
+- Reduced duplicate UI update logic
+- Added localStorage persistence for:
+  - Favorite anime IDs
+  - Dark mode preference
+- Kept code modular and easy to explain for class/demo use
+
+## API Used
 
 - API: Jikan (MyAnimeList unofficial API)
 - Docs: https://docs.api.jikan.moe
-- Endpoint used in this project:
-  - `https://api.jikan.moe/v4/top/anime?filter=airing&limit=24`
+- Endpoint: `https://api.jikan.moe/v4/top/anime?filter=airing&limit=24`
 
-## Core Features
-
-- Trending anime list from live API data
-- Search by anime title
-- Filter by genre
-- Expandable "Synopsis" section per card
-- Loading state and error handling message
-
-## Technologies
+## Tech Stack
 
 - HTML5
-- CSS3 (custom styling + animations)
+- CSS3
 - Vanilla JavaScript (ES6+)
 - Fetch API
 
 ## Project Structure
 
-- `index.html` - App markup and UI containers
-- `style.css` - Responsive design and visual styling
-- `script.js` - API calls, search filtering, and rendering logic
+- `index.html` - Layout and app controls
+- `style.css` - Styling and theme variables
+- `script.js` - API fetch, state, search/filter/sort, rendering, interactions
+- `.github/workflows/deploy-pages.yml` - GitHub Pages deployment workflow
 
-## How to Run
+## Run Locally
 
 1. Clone this repository.
 2. Open the project folder.
-3. Run with any static server, for example:
-   - VS Code Live Server extension, or
+3. Start any static server, for example:
+   - VS Code Live Server, or
    - `python -m http.server 5500`
-4. Open the shown local URL in your browser.
+4. Open the local URL in your browser.
 
-## Milestone Mapping
+## Deployment
 
-### Milestone 1 (Planning)
-- Project idea selected: Anime Next Watch Generator
-- Public API selected: Jikan API
-- Repository and README prepared
+This project is deployed with GitHub Pages using GitHub Actions.
 
-### Milestone 2 (API Integration)
-- API calls implemented with `fetch`
-- Data displayed dynamically on webpage
-- Loading and error states handled
-- Responsive behavior implemented for multiple device sizes
+- Workflow file: `.github/workflows/deploy-pages.yml`
+- Trigger: every push to `main`
 
-## Future Enhancements
-
-- Add pagination / "Load More"
-- Add favorites with localStorage
-- Add trailer preview modal
-- Add advanced filters (year, status, score range)
+If Pages is not active yet, open repository settings and set Pages source to GitHub Actions once.

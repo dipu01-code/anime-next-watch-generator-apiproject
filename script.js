@@ -9,11 +9,40 @@ const refreshBtn = document.getElementById("refreshBtn");
 const statusBox = document.getElementById("status");
 const animeGrid = document.getElementById("animeGrid");
 const cardTemplate = document.getElementById("animeCardTemplate");
+const STORAGE_KEYS = {
+    favorites: "animeFavorites",
+    darkMode: "animeDarkMode",
+};
 
 let sourceAnime = [];
 const favoriteIds = new Set();
 let showFavoritesOnly = false;
 let isDarkMode = false;
+
+function saveFavoriteState() {
+    localStorage.setItem(STORAGE_KEYS.favorites, JSON.stringify([...favoriteIds]));
+}
+
+function loadFavoriteState() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEYS.favorites);
+        const parsed = JSON.parse(raw || "[]");
+
+        if (Array.isArray(parsed)) {
+            parsed.forEach((id) => favoriteIds.add(id));
+        }
+    } catch (error) {
+        console.warn("Could not load favorites from storage.", error);
+    }
+}
+
+function saveThemeState() {
+    localStorage.setItem(STORAGE_KEYS.darkMode, String(isDarkMode));
+}
+
+function loadThemeState() {
+    isDarkMode = localStorage.getItem(STORAGE_KEYS.darkMode) === "true";
+}
 
 function setLoadingState() {
     statusBox.innerHTML = '<div class="loader"><span></span><span></span><span></span></div> Loading trending anime...';
@@ -50,6 +79,12 @@ function buildGenreOptions(animeList) {
         option.textContent = genreName;
         genreFilter.appendChild(option);
     });
+}
+
+function updateFavoriteButton(button, animeId) {
+    const isFavorite = favoriteIds.has(animeId);
+    button.textContent = isFavorite ? "Remove Favorite" : "Add to Favorites";
+    button.classList.toggle("active", isFavorite);
 }
 
 function sortAnime(animeList, sortBy) {
@@ -125,15 +160,14 @@ function renderAnimeCards(animeList) {
         synopsis.textContent = anime.synopsis || "No synopsis available.";
 
         const animeId = getAnimeId(anime);
-        const isFavorite = favoriteIds.has(animeId);
-        favoriteBtn.textContent = isFavorite ? "Remove Favorite" : "Add to Favorites";
-        favoriteBtn.classList.toggle("active", isFavorite);
+        updateFavoriteButton(favoriteBtn, animeId);
         favoriteBtn.addEventListener("click", () => {
             if (favoriteIds.has(animeId)) {
                 favoriteIds.delete(animeId);
             } else {
                 favoriteIds.add(animeId);
             }
+            saveFavoriteState();
             applyControls();
         });
 
@@ -178,9 +212,13 @@ async function loadTrendingAnime() {
     }
 }
 
+function updateFavoritesOnlyLabel() {
+    favoritesOnlyBtn.textContent = `Show Favorites Only: ${showFavoritesOnly ? "On" : "Off"}`;
+}
+
 function toggleFavoritesOnly() {
     showFavoritesOnly = !showFavoritesOnly;
-    favoritesOnlyBtn.textContent = `Show Favorites Only: ${showFavoritesOnly ? "On" : "Off"}`;
+    updateFavoritesOnlyLabel();
     applyControls();
 }
 
@@ -191,6 +229,7 @@ function applyTheme() {
 
 function toggleTheme() {
     isDarkMode = !isDarkMode;
+    saveThemeState();
     applyTheme();
 }
 
@@ -211,5 +250,8 @@ if (themeToggleBtn) {
 }
 refreshBtn.addEventListener("click", loadTrendingAnime);
 
+loadFavoriteState();
+loadThemeState();
+updateFavoritesOnlyLabel();
 applyTheme();
 loadTrendingAnime();
