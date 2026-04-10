@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Anime Next Watch Generator icon">
+  <defs>
+    <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#2563eb" />
+      <stop offset="1" stop-color="#1d4ed8" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#g)" />
+  <circle cx="182" cy="210" r="38" fill="#ffffff" />
+  <circle cx="330" cy="210" r="38" fill="#ffffff" />
+  <path d="M138 334c18 28 53 46 118 46s100-18 118-46" fill="none" stroke="#ffffff" stroke-width="28" stroke-linecap="round" />
+</svg>

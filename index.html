@@ -4,11 +4,13 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#2563eb" />
     <title>Anime Next Watch Generator</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;700&display=swap"
         rel="stylesheet" />
+    <link rel="manifest" href="manifest.webmanifest" />
     <link rel="stylesheet" href="style.css" />
 </head>
 
@@ -56,6 +58,7 @@
         <section id="status" class="status" aria-live="polite"></section>
 
         <section id="animeGrid" class="anime-grid" aria-label="Anime list"></section>
+        <div id="scrollSentinel" class="scroll-sentinel" aria-hidden="true"></div>
     </main>
 
     <template id="animeCardTemplate">

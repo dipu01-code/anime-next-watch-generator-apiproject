@@ -1,4 +1,5 @@
-const API_URL = "https://api.jikan.moe/v4/top/anime?filter=airing&limit=24";
+const API_BASE_URL = "https://api.jikan.moe/v4/top/anime";
+const PAGE_SIZE = 24;
 
 const searchInput = document.getElementById("searchInput");
 const genreFilter = document.getElementById("genreFilter");
@@ -9,6 +10,7 @@ const refreshBtn = document.getElementById("refreshBtn");
 const statusBox = document.getElementById("status");
 const animeGrid = document.getElementById("animeGrid");
 const cardTemplate = document.getElementById("animeCardTemplate");
+const scrollSentinel = document.getElementById("scrollSentinel");
 const STORAGE_KEYS = {
     favorites: "animeFavorites",
     darkMode: "animeDarkMode",
@@ -18,6 +20,51 @@ let sourceAnime = [];
 const favoriteIds = new Set();
 let showFavoritesOnly = false;
 let isDarkMode = false;
+let currentPage = 1;
+let hasMorePages = true;
+let isFetching = false;
+
+function debounce(callback, delayMs) {
+    let timeoutId;
+    return (...args) => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => callback(...args), delayMs);
+    };
+}
+
+function throttle(callback, waitMs) {
+    let lastRun = 0;
+    let trailingTimeout;
+
+    return (...args) => {
+        const now = Date.now();
+        const remaining = waitMs - (now - lastRun);
+
+        if (remaining <= 0) {
+            clearTimeout(trailingTimeout);
+            trailingTimeout = null;
+            lastRun = now;
+            callback(...args);
+            return;
+        }
+
+        if (!trailingTimeout) {
+            trailingTimeout = setTimeout(() => {
+                lastRun = Date.now();
+                trailingTimeout = null;
+                callback(...args);
+            }, remaining);
+        }
+    };
+}
+
+function buildApiUrl(page) {
+    const url = new URL(API_BASE_URL);
+    url.searchParams.set("filter", "airing");
+    url.searchParams.set("limit", String(PAGE_SIZE));
+    url.searchParams.set("page", String(page));
+    return url.toString();
+}
 
 function saveFavoriteState() {
     localStorage.setItem(STORAGE_KEYS.favorites, JSON.stringify([...favoriteIds]));
@@ -61,6 +108,7 @@ function getAnimeId(anime) {
 }
 
 function buildGenreOptions(animeList) {
+    const currentSelection = genreFilter.value || "all";
     const uniqueGenres = animeList
         .flatMap((anime) => (anime.genres || []).map((genre) => genre.name))
         .filter(Boolean)
@@ -79,6 +127,8 @@ function buildGenreOptions(animeList) {
         option.textContent = genreName;
         genreFilter.appendChild(option);
     });
+
+    genreFilter.value = uniqueGenres.includes(currentSelection) ? currentSelection : "all";
 }
 
 function updateFavoriteButton(button, animeId) {
@@ -178,27 +228,66 @@ function renderAnimeCards(animeList) {
     });
 
     animeGrid.appendChild(fragment);
-    setStatusMessage(`Showing ${animeList.length} anime.`);
+    const loadedPages = Math.max(currentPage - 1, 1);
+    const endOfListText = hasMorePages ? "" : " End of list reached.";
+    setStatusMessage(`Showing ${animeList.length} anime. Loaded ${loadedPages} page(s).${endOfListText}`);
 }
 
-async function loadTrendingAnime() {
+function mergeAnimePage(newItems) {
+    const knownIds = new Set(sourceAnime.map(getAnimeId));
+    const uniqueItems = newItems.filter((anime) => !knownIds.has(getAnimeId(anime)));
+    sourceAnime = [...sourceAnime, ...uniqueItems];
+    return uniqueItems.length;
+}
+
+async function loadTrendingAnime({ reset = false } = {}) {
+    if (isFetching) {
+        return;
+    }
+
+    if (reset) {
+        sourceAnime = [];
+        currentPage = 1;
+        hasMorePages = true;
+        animeGrid.innerHTML = "";
+    }
+
+    if (!hasMorePages) {
+        return;
+    }
+
+    isFetching = true;
     setLoadingState();
     refreshBtn.disabled = true;
 
     try {
-        const response = await fetch(API_URL, { cache: "no-store" });
+        const response = await fetch(buildApiUrl(currentPage), { cache: "no-store" });
 
         if (!response.ok) {
             throw new Error(`Request failed with status ${response.status}`);
         }
 
         const payload = await response.json();
-        sourceAnime = Array.isArray(payload.data) ? payload.data : [];
+        const pageItems = Array.isArray(payload.data) ? payload.data : [];
 
-        if (sourceAnime.length === 0) {
-            animeGrid.innerHTML = "";
-            setStatusMessage("No anime data returned from API.");
+        if (pageItems.length === 0) {
+            hasMorePages = false;
+
+            if (sourceAnime.length === 0) {
+                animeGrid.innerHTML = "";
+                setStatusMessage("No anime data returned from API.");
+            } else {
+                applyControls();
+            }
             return;
+        }
+
+        const addedCount = mergeAnimePage(pageItems);
+
+        if (addedCount === 0) {
+            hasMorePages = false;
+        } else {
+            currentPage += 1;
         }
 
         buildGenreOptions(sourceAnime);
@@ -208,6 +297,7 @@ async function loadTrendingAnime() {
         animeGrid.innerHTML = "";
         setStatusMessage("Could not load anime right now. Please try refresh.");
     } finally {
+        isFetching = false;
         refreshBtn.disabled = false;
     }
 }
@@ -233,8 +323,50 @@ function toggleTheme() {
     applyTheme();
 }
 
+function setupInfiniteScroll() {
+    if (!scrollSentinel || !("IntersectionObserver" in window)) {
+        return;
+    }
+
+    const throttledLoadMore = throttle(() => {
+        if (!showFavoritesOnly && hasMorePages && !isFetching) {
+            loadTrendingAnime();
+        }
+    }, 800);
+
+    const observer = new IntersectionObserver(
+        (entries) => {
+            if (entries.some((entry) => entry.isIntersecting)) {
+                throttledLoadMore();
+            }
+        },
+        {
+            root: null,
+            rootMargin: "350px 0px",
+            threshold: 0,
+        }
+    );
+
+    observer.observe(scrollSentinel);
+}
+
+function registerServiceWorker() {
+    if (!("serviceWorker" in navigator)) {
+        return;
+    }
+
+    window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js").catch((error) => {
+            console.warn("Service worker registration failed.", error);
+        });
+    });
+}
+
+const debouncedApplyControls = debounce(applyControls, 250);
+const throttledRefresh = throttle(() => loadTrendingAnime({ reset: true }), 1200);
+
 if (searchInput) {
-    searchInput.addEventListener("input", applyControls);
+    searchInput.addEventListener("input", debouncedApplyControls);
 }
 if (genreFilter) {
     genreFilter.addEventListener("change", applyControls);
@@ -248,10 +380,12 @@ if (favoritesOnlyBtn) {
 if (themeToggleBtn) {
     themeToggleBtn.addEventListener("click", toggleTheme);
 }
-refreshBtn.addEventListener("click", loadTrendingAnime);
+refreshBtn.addEventListener("click", throttledRefresh);
 
 loadFavoriteState();
 loadThemeState();
 updateFavoritesOnlyLabel();
 applyTheme();
-loadTrendingAnime();
+setupInfiniteScroll();
+registerServiceWorker();
+loadTrendingAnime({ reset: true });
